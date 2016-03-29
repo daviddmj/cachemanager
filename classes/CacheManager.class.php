@@ -23,7 +23,8 @@ final class CacheManager
      * @param $data
      * @return array|null
      */
-    protected function recursive_array_search($content,$data) {
+    protected function arraySearchInContent($content, $data)
+    {
         $iterator  = new \RecursiveArrayIterator($data);
         $recursive = new \RecursiveIteratorIterator(
             $iterator,
@@ -37,6 +38,11 @@ final class CacheManager
         return null;
     }
 
+    protected function textSearchInContent($needle, $content)
+    {
+        return preg_match('#\b' . preg_quote($needle, '#') . '\b#i', $content);
+    }
+
     /**
      * @param mixed $cacheFile
      * @return $this
@@ -48,11 +54,15 @@ final class CacheManager
                 if (is_array($cacheFileData)) {
                     $this->addRecursive($cacheFileData);
                 } else {
-                    $this->addCacheFile($cacheFileData);
+                    if ($cacheFileData instanceof CacheFile) {
+                        $this->addCacheFile($cacheFileData);
+                    }
                 }
             }
         } else {
-            $this->addCacheFile($cacheFile);
+            if ($cacheFile instanceof CacheFile) {
+                $this->addCacheFile($cacheFile);
+            }
         }
 
         return $this;
@@ -63,9 +73,7 @@ final class CacheManager
      */
     public function __construct()
     {
-        foreach (func_get_args() as $cacheFile) {
-            $this->addRecursive($cacheFile);
-        }
+        $this->setCacheFiles(func_get_args());
 
         if (!self::$instance) {
             self::$instance = $this;
@@ -148,10 +156,10 @@ final class CacheManager
     }
 
     /**
-     * @param string $content
+     * @param string $needle
      * @return array
      */
-    public function findCacheFilesMatching($content)
+    public function findCacheFilesMatching($needle)
     {
         $eligibleCache = [];
 
@@ -161,11 +169,11 @@ final class CacheManager
 
             if ($cacheContent) {
                 if (!is_array($cacheContent)) {
-                    if (preg_match('#\b' . preg_quote($content, '#') . '\b#i', $cacheContent)) {
+                    if ($this->textSearchInContent($needle, $cacheContent)) {
                         $eligibleCache[$cacheFile->getName()] = $cacheFile;
                     }
                 } else {
-                    if ($this->recursive_array_search($content, $cacheContent)) {
+                    if ($this->arraySearchInContent($needle, $cacheContent)) {
                         $eligibleCache[$cacheFile->getName()] = $cacheFile;
                     }
                 }
