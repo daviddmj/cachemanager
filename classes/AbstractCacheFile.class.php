@@ -6,6 +6,9 @@
 namespace cache\file;
 
 require_once ('CacheFile.interface.php');
+require_once ('FileOperationException.class.php');
+
+use cache\exception\FileOperationException;
 
 /**
  * Abstract Cache File class
@@ -103,7 +106,7 @@ abstract class AbstractCacheFile implements CacheFileInterface
     {
         if ($createCacheDirectory) {
             if (!is_dir($cacheDirectory) && !mkdir($cacheDirectory)) {
-                throw new \Exception(sprintf('unable to create cache directory "%s"', $cacheDirectory));
+                throw new FileOperationException(sprintf('unable to create cache directory "%s"', $cacheDirectory));
             }
         }
 
@@ -175,7 +178,7 @@ abstract class AbstractCacheFile implements CacheFileInterface
     {
         if (file_exists($this->getCachePath())) {
             if (!unlink($this->getCachePath())) {
-                throw new \Exception(sprintf('unable to remove file %s', $this->getCachePath()));
+                throw new FileOperationException(sprintf('unable to remove file %s', $this->getCachePath()));
             }
         }
 
@@ -199,7 +202,7 @@ abstract class AbstractCacheFile implements CacheFileInterface
         $this->modified = false;
 
         if (file_put_contents($this->getCachePath(), serialize($dataObject)) == false) {
-            throw new \Exception(sprintf('unable to create file %s', $this->getCachePath()));
+            throw new FileOperationException(sprintf('unable to create file %s', $this->getCachePath()));
         }
 
         return $this;
