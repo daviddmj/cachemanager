@@ -167,16 +167,17 @@ final class CacheManager
         foreach ($this->cacheFiles as $cacheFile) {
             $cacheContent = $cacheFile->getContent();
 
-            if ($cacheContent) {
-                if (!is_array($cacheContent)) {
-                    if ($this->textSearchInContent($needle, $cacheContent)) {
-                        $eligibleCache[$cacheFile->getName()] = $cacheFile;
-                    }
-                } else {
+            switch (gettype($cacheContent)) {
+                case 'array':
                     if ($this->arraySearchInContent($needle, $cacheContent)) {
                         $eligibleCache[$cacheFile->getName()] = $cacheFile;
                     }
-                }
+                break;
+                case 'string':
+                    if ($this->textSearchInContent($needle, $cacheContent)) {
+                        $eligibleCache[$cacheFile->getName()] = $cacheFile;
+                    }
+                break;
             }
         }
 
