@@ -253,6 +253,14 @@ abstract class AbstractCacheFile implements CacheFileInterface
     /**
      * @return string
      */
+    public function getContentType()
+    {
+        return gettype($this->content);
+    }
+
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return $this->getName();
