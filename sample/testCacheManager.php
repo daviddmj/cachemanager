@@ -4,8 +4,7 @@
  * @author David AFONSO <dafonso@prestaconcept.net>
  */
 
-require_once(dirname(__FILE__).'/../classes/CacheFile.class.php');
-require_once(dirname(__FILE__).'/../classes/CacheManager.class.php');
+require_once(dirname(__FILE__) . '/../autoload.php');
 
 use cache\manager\CacheManager;
 use cache\file\CacheFile;
@@ -28,16 +27,16 @@ $cacheManager
     ->deleteFiles();
 
 if (!$cacheFileHTML->hasContent()) {
-    $cacheFileHTML->setContent('dfsdfsdfsd fsgndfgoidfndfogi fgfdgdfga');
+    $cacheFileHTML->setContent('This is a sample text');
 }
 
 if (!$cacheFileArray->hasContent()) {
     $cacheFileArray->setContent(
         [
-            'data_key' => 'random data',
-            'nested_data' => [
-                'data_key_nested' => [
-                    'over_nested' => 'nested value 2'
+            'key_without_nested_data' => 'random data',
+            'key_with_nested_data' => [
+                'nested_array' => [
+                    'nested_key' => 'nested value'
                 ]
             ]
         ]
@@ -46,8 +45,8 @@ if (!$cacheFileArray->hasContent()) {
 
 $cacheManager->flush();
 
-$cacheFilesWithGoogle = $cacheManager->findCacheFilesMatching('fgfdgdfga');
-$cacheFilesWithDataKey = $cacheManager->findCacheFilesMatching('over_nested');
+$cacheFilesWithGoogle = $cacheManager->findCacheFilesMatching('sample text');
+$cacheFilesWithDataKey = $cacheManager->findCacheFilesMatching('nested_key');
 
 $cacheFiles = array_merge($cacheFilesWithGoogle, $cacheFilesWithDataKey);
 

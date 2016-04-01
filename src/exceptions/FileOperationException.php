@@ -3,7 +3,6 @@
  * @author David AFONSO <dafonso@prestaconcept.net>
  */
 
-
 namespace cache\exception;
 
 /**

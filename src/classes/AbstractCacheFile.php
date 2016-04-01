@@ -5,9 +5,6 @@
 
 namespace cache\file;
 
-require_once ('CacheFile.interface.php');
-require_once ('FileOperationException.class.php');
-
 use cache\exception\FileOperationException;
 
 /**

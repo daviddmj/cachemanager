@@ -5,8 +5,6 @@
 
 namespace cache\file;
 
-require_once ('AbstractCacheFile.class.php');
-
 /**
  * Class CacheFile
  */
