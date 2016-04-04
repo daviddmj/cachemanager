@@ -6,6 +6,7 @@
 namespace cache\manager;
 
 use cache\file\CacheFile;
+use cache\interfaces\SearchProcessorInterface;
 use cache\search;
 
 /**
@@ -13,29 +14,14 @@ use cache\search;
  */
 final class CacheManager
 {
-    const TYPE_ARRAY  = 'array';
-    const TYPE_STRING = 'string';
-
     /** @var CacheManager|null */
     private static $instance = null;
 
     /** @var array $cacheFiles */
     private $cacheFiles = [];
 
-    /**
-     * @param $cacheContent
-     * @return string
-     */
-    static private function getSearchClass($cacheContent)
-    {
-        switch (gettype($cacheContent)) {
-            case self::TYPE_ARRAY:
-                return 'cache\search\arraySearch';
-            case self::TYPE_STRING:
-            default:
-                return 'cache\search\textSearch';
-        }
-    }
+    /** @var array $searchProcessors */
+    private $searchProcessors = [];
 
     /**
      * @param mixed $cacheFile
@@ -64,10 +50,17 @@ final class CacheManager
 
     /**
      * CacheManager constructor.
+     * @param array $searchProcessors
      */
-    public function __construct()
+    public function __construct($searchProcessors = [])
     {
-        $this->setCacheFiles(func_get_args());
+        if (is_array($searchProcessors)) {
+            foreach ($searchProcessors as $searchProvider) {
+                if ($searchProvider instanceof SearchProcessorInterface) {
+                    $this->searchProcessors[$searchProvider->getName()] = $searchProvider;
+                }
+            }
+        }
 
         if (!self::$instance) {
             self::$instance = $this;
@@ -76,12 +69,13 @@ final class CacheManager
 
     /**
      * CacheManager Singleton
+     * @param array $searchProcessors
      * @return $this
      */
-    public static function getInstance()
+    public static function getInstance($searchProcessors = [])
     {
         if (!self::$instance) {
-            self::$instance = new self(func_get_args());
+            self::$instance = new self($searchProcessors);
         }
         return self::$instance;
     }
@@ -161,8 +155,11 @@ final class CacheManager
         foreach ($this->cacheFiles as $cacheFile) {
             $cacheContent = $cacheFile->getContent();
 
-            if (call_user_func_array([self::getSearchClass($cacheContent), 'search'], [$needle, $cacheContent])) {
-                $eligibleCache[$cacheFile->getName()] = $cacheFile;
+            /** @var SearchProcessorInterface $searchProcessor */
+            foreach ($this->searchProcessors as $searchProcessor) {
+                if ($searchProcessor->search($needle, $cacheContent)) {
+                    $eligibleCache[$cacheFile->getName()] = $cacheFile;
+                }
             }
         }
 

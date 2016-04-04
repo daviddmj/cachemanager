@@ -2,22 +2,41 @@
 
 namespace cache\search;
 
-use cache\interfaces\SearchInterface;
+use cache\interfaces\SearchProcessorInterface;
 
 /**
  * Class arraySearch
  * @package cache\search
  */
-class arraySearch implements SearchInterface
+class arraySearchProcessor implements SearchProcessorInterface
 {
+    /**
+     * @return string
+     */
+    function getName()
+    {
+        return 'array_search';
+    }
+
+    /**
+     * @param $content
+     * @return bool
+     */
+    function isEligible($content)
+    {
+        return 'array' == gettype($content);
+    }
+
     /**
      * @param $needle
      * @param $content
      * @return mixed|null
      */
-    static function search($needle, $content)
+    function search($needle, $content)
     {
-        $iterator  = new \RecursiveArrayIterator($content);
+        if (!$this->isEligible($content)) return null;
+
+        $iterator = new \RecursiveArrayIterator($content);
         $recursive = new \RecursiveIteratorIterator(
             $iterator,
             \RecursiveIteratorIterator::SELF_FIRST
@@ -27,6 +46,5 @@ class arraySearch implements SearchInterface
                 return $value;
             }
         }
-        return null;
     }
 }

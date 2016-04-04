@@ -8,6 +8,8 @@ require_once(dirname(__FILE__) . '/../autoload.php');
 
 use cache\manager\CacheManager;
 use cache\file\CacheFile;
+use cache\search\textSearchProcessor;
+use cache\search\arraySearchProcessor;
 
 $cacheFileHTML = new CacheFile('html_content');
 $cacheFileHTML->setCacheDirectory(dirname(__FILE__).'/../cache', true);
@@ -15,7 +17,12 @@ $cacheFileHTML->setCacheDirectory(dirname(__FILE__).'/../cache', true);
 $cacheFileArray = new CacheFile('array_content');
 $cacheFileArray->setCacheDirectory(dirname(__FILE__).'/../cache', true);
 
-$cacheManager = new CacheManager();
+$cacheManager = new CacheManager(
+    [
+        new textSearchProcessor(),
+        new arraySearchProcessor()
+    ]
+);
 
 $cacheManager
     ->setCacheFiles(
