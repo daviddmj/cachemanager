@@ -6,12 +6,16 @@
 namespace cache\manager;
 
 use cache\file\CacheFile;
+use cache\search;
 
 /**
  * Class cacheManager
  */
 final class CacheManager
 {
+    const TYPE_ARRAY  = 'array';
+    const TYPE_STRING = 'string';
+
     /** @var CacheManager|null */
     private static $instance = null;
 
@@ -19,28 +23,18 @@ final class CacheManager
     private $cacheFiles = [];
 
     /**
-     * @param $content
-     * @param $data
-     * @return array|null
+     * @param $cacheContent
+     * @return string
      */
-    protected function arraySearchInContent($content, $data)
+    static private function getSearchClass($cacheContent)
     {
-        $iterator  = new \RecursiveArrayIterator($data);
-        $recursive = new \RecursiveIteratorIterator(
-            $iterator,
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
-        foreach ($recursive as $key => $value) {
-            if ($key === $content) {
-                return $value;
-            }
+        switch (gettype($cacheContent)) {
+            case self::TYPE_ARRAY:
+                return 'cache\search\arraySearch';
+            case self::TYPE_STRING:
+            default:
+                return 'cache\search\textSearch';
         }
-        return null;
-    }
-
-    protected function textSearchInContent($needle, $content)
-    {
-        return preg_match('#\b' . preg_quote($needle, '#') . '\b#i', $content);
     }
 
     /**
@@ -167,17 +161,8 @@ final class CacheManager
         foreach ($this->cacheFiles as $cacheFile) {
             $cacheContent = $cacheFile->getContent();
 
-            switch (gettype($cacheContent)) {
-                case 'array':
-                    if ($this->arraySearchInContent($needle, $cacheContent)) {
-                        $eligibleCache[$cacheFile->getName()] = $cacheFile;
-                    }
-                break;
-                case 'string':
-                    if ($this->textSearchInContent($needle, $cacheContent)) {
-                        $eligibleCache[$cacheFile->getName()] = $cacheFile;
-                    }
-                break;
+            if (call_user_func_array([self::getSearchClass($cacheContent), 'search'], [$needle, $cacheContent])) {
+                $eligibleCache[$cacheFile->getName()] = $cacheFile;
             }
         }
 

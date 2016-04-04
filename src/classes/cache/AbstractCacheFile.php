@@ -6,6 +6,7 @@
 namespace cache\file;
 
 use cache\exception\FileOperationException;
+use cache\interfaces\CacheFileInterface;
 
 /**
  * Abstract Cache File class
@@ -59,7 +60,6 @@ abstract class AbstractCacheFile implements CacheFileInterface
 
         if (!is_object($cacheObject) || time() > strtotime($cacheObject->expirationDate)) {
             $this->deleteFile();
-            $this->cacheFile = null;
             return null;
         }
 

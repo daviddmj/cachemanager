@@ -3,7 +3,7 @@
  * @author David AFONSO <dafonso@prestaconcept.net>
  */
 
-namespace cache\file;
+namespace cache\interfaces;
 
 /**
  * Interface CacheFileInterface
