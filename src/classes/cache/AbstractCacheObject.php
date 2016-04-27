@@ -6,12 +6,12 @@
 namespace cache\file;
 
 use cache\exception\FileOperationException;
-use cache\interfaces\CacheFileInterface;
+use cache\interfaces\CacheObjectInterface;
 
 /**
- * Abstract Cache File class
+ * Abstract Cache Object class
  */
-abstract class AbstractCacheFile implements CacheFileInterface
+abstract class AbstractCacheObject implements CacheObjectInterface
 {
     /** @var string */
     private $cacheDirectory = '.';
@@ -82,7 +82,7 @@ abstract class AbstractCacheFile implements CacheFileInterface
      */
     public function getExpirationDate()
     {
-        return date('Y-m-d H:i:s', strtotime("this day + {$this->expirationDelay} minutes"));
+        return date('Y-m-d H:i:s', strtotime("now + {$this->expirationDelay} minutes"));
     }
 
     /**

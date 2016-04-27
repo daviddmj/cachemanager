@@ -8,7 +8,7 @@ use cache\interfaces\SearchProcessorInterface;
  * Class textSearch
  * @package cache\search
  */
-class textSearchProcessor implements SearchProcessorInterface
+class TextSearchProcessor implements SearchProcessorInterface
 {
     /**
      * @return string

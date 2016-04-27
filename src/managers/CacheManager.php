@@ -5,7 +5,8 @@
 
 namespace cache\manager;
 
-use cache\file\CacheFile;
+use cache\file\CacheObject;
+use cache\interfaces\CacheObjectInterface;
 use cache\interfaces\SearchProcessorInterface;
 use cache\search;
 
@@ -17,31 +18,31 @@ final class CacheManager
     /** @var CacheManager|null */
     private static $instance = null;
 
-    /** @var array $cacheFiles */
-    private $cacheFiles = [];
+    /** @var array $cacheObjects */
+    private $cacheObjects = [];
 
     /** @var array $searchProcessors */
     private $searchProcessors = [];
 
     /**
-     * @param mixed $cacheFile
+     * @param mixed $cacheObject
      * @return $this
      */
-    protected function addRecursive($cacheFile)
+    protected function addRecursive($cacheObject)
     {
-        if (is_array($cacheFile)) {
-            foreach ($cacheFile as $cacheFileData) {
-                if (is_array($cacheFileData)) {
-                    $this->addRecursive($cacheFileData);
+        if (is_array($cacheObject)) {
+            foreach ($cacheObject as $cacheObjectData) {
+                if (is_array($cacheObjectData)) {
+                    $this->addRecursive($cacheObjectData);
                 } else {
-                    if ($cacheFileData instanceof CacheFile) {
-                        $this->addCacheFile($cacheFileData);
+                    if ($cacheObjectData instanceof CacheObject) {
+                        $this->addCacheObject($cacheObjectData);
                     }
                 }
             }
         } else {
-            if ($cacheFile instanceof CacheFile) {
-                $this->addCacheFile($cacheFile);
+            if ($cacheObject instanceof CacheObject) {
+                $this->addCacheObject($cacheObject);
             }
         }
 
@@ -52,12 +53,12 @@ final class CacheManager
      * CacheManager constructor.
      * @param array $searchProcessors
      */
-    public function __construct($searchProcessors = [])
+    public function __construct(array $searchProcessors = [])
     {
         if (is_array($searchProcessors)) {
-            foreach ($searchProcessors as $searchProvider) {
-                if ($searchProvider instanceof SearchProcessorInterface) {
-                    $this->searchProcessors[$searchProvider->getName()] = $searchProvider;
+            foreach ($searchProcessors as $searchProcessor) {
+                if ($searchProcessor instanceof SearchProcessorInterface) {
+                    $this->addSearchProcessor($searchProcessor);
                 }
             }
         }
@@ -72,7 +73,7 @@ final class CacheManager
      * @param array $searchProcessors
      * @return $this
      */
-    public static function getInstance($searchProcessors = [])
+    public static function getInstance(array $searchProcessors = [])
     {
         if (!self::$instance) {
             self::$instance = new self($searchProcessors);
@@ -81,89 +82,141 @@ final class CacheManager
     }
 
     /**
-     * @return array
-     */
-    public function getCacheFiles()
-    {
-        return $this->cacheFiles;
-    }
-
-    /**
-     * @param $cacheFiles
-     * @return $this
-     */
-    public function setCacheFiles($cacheFiles)
-    {
-        $this->addRecursive($cacheFiles);
-
-        return $this;
-    }
-
-    /**
-     * @param CacheFile $cacheFile
+     * @param SearchProcessorInterface $searchProcessor
      * @return bool
      */
-    public function contains(CacheFile $cacheFile)
+    public function containsSearchProcessor(SearchProcessorInterface $searchProcessor)
     {
-        return (isset($this->cacheFiles[$cacheFile->getName()]) && ($this->cacheFiles[$cacheFile->getName()] instanceof CacheFile));
+        return (isset($this->searchProcessors[$searchProcessor->getName()]) && ($this->searchProcessors[$searchProcessor->getName()] instanceof SearchProcessorInterface));
     }
 
     /**
-     * @param CacheFile $cacheFile
+     * @return array
+     */
+    public function getSearchProcessors()
+    {
+        return $this->searchProcessors;
+    }
+
+    /**
+     * @param SearchProcessorInterface $searchProcessor
      * @return $this
      */
-    public function addCacheFile(CacheFile $cacheFile)
+    public function addSearchProcessor(SearchProcessorInterface $searchProcessor)
     {
-        if (!$this->contains($cacheFile)) {
-            $this->cacheFiles[$cacheFile->getName()] = $cacheFile;
+        if (!$this->containsSearchProcessor($searchProcessor)) {
+            $this->searchProcessors[$searchProcessor->getName()] = $searchProcessor;
         }
 
         return $this;
     }
 
     /**
-     * @param CacheFile $cacheFile
+     * @param SearchProcessorInterface $searchProcessor
      * @return $this
      */
-    public function removeCacheFile(CacheFile $cacheFile)
+    public function removeSearchProcessor(SearchProcessorInterface $searchProcessor)
     {
-        if ($this->contains($cacheFile)) {
-            unset($this->cacheFiles[$cacheFile->getName()]);
+        if ($this->containsSearchProcessor($searchProcessor)) {
+            unset($this->searchProcessors[$searchProcessor->getName()]);
         }
 
         return $this;
     }
 
     /**
-     * @param string $cacheFileName
-     * @return CacheFile|null
+     * @param string $searchProcessorName
+     * @return searchProcessorInterface|null
      */
-    public function getCacheFile($cacheFileName)
+    public function getSearchProcessor($searchProcessorName)
     {
-        return isset($this->cacheFiles[$cacheFileName]) ? $this->cacheFiles[$cacheFileName] : null;
+        return isset($this->searchProcessors[$searchProcessorName]) ? $this->searchProcessors[$searchProcessorName] : null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCacheObjects()
+    {
+        return $this->cacheObjects;
+    }
+
+    /**
+     * @param $cacheObjects
+     * @return $this
+     */
+    public function setCacheObjects(array $cacheObjects)
+    {
+        $this->addRecursive($cacheObjects);
+
+        return $this;
+    }
+
+    /**
+     * @param CacheObjectInterface $cacheObject
+     * @return bool
+     */
+    public function containsCacheObject(CacheObjectInterface $cacheObject)
+    {
+        return (isset($this->cacheObjects[$cacheObject->getName()]) && ($this->cacheObjects[$cacheObject->getName()] instanceof CacheObjectInterface));
+    }
+
+    /**
+     * @param CacheObjectInterface $cacheObject
+     * @return $this
+     */
+    public function addCacheObject(CacheObjectInterface $cacheObject)
+    {
+        if (!$this->containsCacheObject($cacheObject)) {
+            $this->cacheObjects[$cacheObject->getName()] = $cacheObject;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param CacheObjectInterface $cacheObject
+     * @return $this
+     */
+    public function removeCacheObject(CacheObjectInterface $cacheObject)
+    {
+        if ($this->containsCacheObject($cacheObject)) {
+            unset($this->cacheObjects[$cacheObject->getName()]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $cacheObjectName
+     * @return CacheObjectInterface|null
+     */
+    public function getCacheObject($cacheObjectName)
+    {
+        return isset($this->cacheObjects[$cacheObjectName]) ? $this->cacheObjects[$cacheObjectName] : null;
     }
 
     /**
      * @param string $needle
      * @return array
      */
-    public function findCacheFilesMatching($needle)
+    public function findCacheObjectsMatching($needle)
     {
-        $eligibleCache = [];
+        $eligibleCacheObjects = [];
 
-        /** @var CacheFile $cacheFile */
-        foreach ($this->cacheFiles as $cacheFile) {
-            $cacheContent = $cacheFile->getContent();
+        /** @var CacheObject $cacheObject */
+        foreach ($this->cacheObjects as $cacheObject) {
+            $cacheContent = $cacheObject->getContent();
 
             /** @var SearchProcessorInterface $searchProcessor */
             foreach ($this->searchProcessors as $searchProcessor) {
                 if ($searchProcessor->search($needle, $cacheContent)) {
-                    $eligibleCache[$cacheFile->getName()] = $cacheFile;
+                    $eligibleCacheObjects[$cacheObject->getName()] = $cacheObject;
                 }
             }
         }
 
-        return $eligibleCache;
+        return $eligibleCacheObjects;
     }
 
     /**
@@ -171,9 +224,9 @@ final class CacheManager
      */
     public function deleteFiles()
     {
-        /** @var CacheFile $cacheFile */
-        foreach ($this->cacheFiles as $cacheFile) {
-            $cacheFile->deleteFile();
+        /** @var CacheObjectInterface $cacheObject */
+        foreach ($this->cacheObjects as $cacheObject) {
+            $cacheObject->deleteFile();
         }
 
         return $this;
@@ -184,24 +237,24 @@ final class CacheManager
      */
     public function clear()
     {
-        foreach ($this->cacheFiles as $cacheFile) {
-            $this->removeCacheFile($cacheFile);
+        foreach ($this->cacheObjects as $cacheObject) {
+            $this->removeCacheObject($cacheObject);
         }
 
         return $this;
     }
 
     /**
-     * @param null|CacheFile $cacheFile
+     * @param null|CacheObjectInterface $cacheObject
      * @return $this
      */
-    public function flush($cacheFile = null) {
-        if ($cacheFile instanceof CacheFile) {
-            $cacheFile->writeFile();
+    public function flush($cacheObject = null) {
+        if ($cacheObject instanceof CacheObjectInterface && $cacheObject->isModified()) {
+            $cacheObject->writeFile();
         } else {
-            /** @var CacheFile $cacheFile */
-            foreach ($this->cacheFiles as $cacheFile) {
-                $cacheFile->writeFile();
+            /** @var CacheObjectInterface $cacheObject */
+            foreach ($this->cacheObjects as $cacheObject) {
+                if ($cacheObject->isModified()) $cacheObject->writeFile();
             }
         }
 

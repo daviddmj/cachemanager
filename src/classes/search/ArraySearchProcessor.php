@@ -8,7 +8,7 @@ use cache\interfaces\SearchProcessorInterface;
  * Class arraySearch
  * @package cache\search
  */
-class arraySearchProcessor implements SearchProcessorInterface
+class ArraySearchProcessor implements SearchProcessorInterface
 {
     /**
      * @return string

@@ -6,9 +6,9 @@
 namespace cache\file;
 
 /**
- * Class CacheFile
+ * Class CacheObject
  */
-class CacheFile extends AbstractCacheFile
+class CacheObject extends AbstractCacheObject
 {
 
 }

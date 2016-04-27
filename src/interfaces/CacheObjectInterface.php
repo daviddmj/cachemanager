@@ -6,9 +6,9 @@
 namespace cache\interfaces;
 
 /**
- * Interface CacheFileInterface
+ * Interface CacheObjectInterface
  */
-interface CacheFileInterface
+interface CacheObjectInterface
 {
     /**
      * @return string
@@ -49,4 +49,19 @@ interface CacheFileInterface
      * @param mixed $content
      */
     function setContent($content);
+
+    /**
+     * @return mixed
+     */
+    function writeFile();
+
+    /**
+     * @return mixed
+     */
+    function deleteFile();
+
+    /**
+     * @return bool
+     */
+    function isModified();
 }
