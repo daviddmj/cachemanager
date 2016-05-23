@@ -64,4 +64,15 @@ interface CacheObjectInterface
      * @return bool
      */
     function isModified();
+
+    /**
+     * @return mixed
+     */
+    function getCacheManager();
+
+    /**
+     * @param $cacheManager
+     * @return mixed
+     */
+    function setCacheManager($cacheManager);
 }

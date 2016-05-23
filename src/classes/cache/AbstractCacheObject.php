@@ -7,6 +7,7 @@ namespace cache\file;
 
 use cache\exception\FileOperationException;
 use cache\interfaces\CacheObjectInterface;
+use cache\manager\CacheManager;
 
 /**
  * Abstract Cache Object class
@@ -30,6 +31,9 @@ abstract class AbstractCacheObject implements CacheObjectInterface
 
     /** @var bool $modified */
     private $modified = false;
+
+    /** @var null|CacheManager $cacheManager */
+    private $cacheManager = null;
 
     /**
      * CacheFile constructor.
@@ -232,6 +236,25 @@ abstract class AbstractCacheObject implements CacheObjectInterface
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @return null|CacheManager
+     */
+    public function getCacheManager()
+    {
+        return $this->cacheManager;
+    }
+
+    /**
+     * @param CacheManager|null $cacheManager
+     * @return $this|mixed
+     */
+    public function setCacheManager($cacheManager = null)
+    {
+        $this->cacheManager = $cacheManager;
+
+        return $this;
     }
 
     /**

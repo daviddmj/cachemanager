@@ -168,6 +168,7 @@ final class CacheManager
     public function addCacheObject(CacheObjectInterface $cacheObject)
     {
         if (!$this->containsCacheObject($cacheObject)) {
+            $cacheObject->setCacheManager($this);
             $this->cacheObjects[$cacheObject->getName()] = $cacheObject;
         }
 
@@ -181,6 +182,7 @@ final class CacheManager
     public function removeCacheObject(CacheObjectInterface $cacheObject)
     {
         if ($this->containsCacheObject($cacheObject)) {
+            $cacheObject->setCacheManager(null);
             unset($this->cacheObjects[$cacheObject->getName()]);
         }
 
