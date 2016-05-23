@@ -5,7 +5,6 @@
 
 namespace cache\manager;
 
-use cache\file\CacheObject;
 use cache\interfaces\CacheObjectInterface;
 use cache\interfaces\SearchProcessorInterface;
 use cache\search;
@@ -35,13 +34,13 @@ final class CacheManager
                 if (is_array($cacheObjectData)) {
                     $this->addRecursive($cacheObjectData);
                 } else {
-                    if ($cacheObjectData instanceof CacheObject) {
+                    if ($cacheObjectData instanceof CacheObjectInterface) {
                         $this->addCacheObject($cacheObjectData);
                     }
                 }
             }
         } else {
-            if ($cacheObject instanceof CacheObject) {
+            if ($cacheObject instanceof CacheObjectInterface) {
                 $this->addCacheObject($cacheObject);
             }
         }
@@ -206,7 +205,7 @@ final class CacheManager
     {
         $eligibleCacheObjects = [];
 
-        /** @var CacheObject $cacheObject */
+        /** @var CacheObjectInterface $cacheObject */
         foreach ($this->cacheObjects as $cacheObject) {
             $cacheContent = $cacheObject->getContent();
 

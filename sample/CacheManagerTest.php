@@ -35,7 +35,7 @@ $cacheManager
 ;
 
 if (!$cacheHTMLObject->hasContent()) {
-    $cacheHTMLObject->setContent(file_get_contents('http://www.google.com/'));
+    $cacheHTMLObject->setContent(file_get_contents('http://www.google.com/'), true);
 }
 
 if (!$cacheArrayObject->hasContent()) {

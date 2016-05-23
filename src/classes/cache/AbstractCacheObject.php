@@ -35,6 +35,9 @@ abstract class AbstractCacheObject implements CacheObjectInterface
     /** @var null|CacheManager $cacheManager */
     private $cacheManager = null;
 
+    /** @var bool $compressed */
+    private $compressed = false;
+
     /**
      * CacheFile constructor.
      * @param $name
@@ -67,7 +70,8 @@ abstract class AbstractCacheObject implements CacheObjectInterface
             return null;
         }
 
-        $this->content = $cacheObject->content;
+        $this->content = $cacheObject->compressed ? zlib_decode($cacheObject->content): $cacheObject->content;
+        $this->compressed = false;
         $this->modified = false;
 
         return $this->content;
@@ -154,17 +158,19 @@ abstract class AbstractCacheObject implements CacheObjectInterface
             return $this->refresh();
         }
 
-        return $this->content;
+        return $this->compressed ? zlib_decode($this->content) : $this->content;
     }
 
     /**
      * @param mixed $content
+     * @param bool $compress Compress data if string content
      * @return $this
      */
-    public function setContent($content = null)
+    public function setContent($content = null, $compress = false)
     {
         if ($content) {
-            $this->content = $content;
+            $this->compressed = is_string($content) && $compress;
+            $this->content = $this->compressed ? zlib_encode($content, ZLIB_ENCODING_GZIP) : $content;
             $this->modified = true;
         }
 
@@ -199,6 +205,7 @@ abstract class AbstractCacheObject implements CacheObjectInterface
         $dataObject = new \stdClass();
         $dataObject->expirationDate = $this->getExpirationDate();
         $dataObject->content = $this->content;
+        $dataObject->compressed = $this->compressed;
 
         $this->modified = false;
 
