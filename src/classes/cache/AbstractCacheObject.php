@@ -14,6 +14,10 @@ use cache\manager\CacheManager;
  */
 abstract class AbstractCacheObject implements CacheObjectInterface
 {
+    // Cache directory use mode
+    const USE_EXISTING_DIR = 1;
+    const FORCE_CREATE_DIR = 2;
+
     /** @var string */
     private $cacheDirectory = '.';
 
@@ -70,7 +74,7 @@ abstract class AbstractCacheObject implements CacheObjectInterface
             return null;
         }
 
-        $this->content = $cacheObject->compressed ? zlib_decode($cacheObject->content): $cacheObject->content;
+        $this->content = $cacheObject->compressed ? unserialize(zlib_decode($cacheObject->content)): $cacheObject->content;
         $this->compressed = false;
         $this->modified = false;
 
@@ -90,7 +94,7 @@ abstract class AbstractCacheObject implements CacheObjectInterface
      */
     public function getExpirationDate()
     {
-        return date('Y-m-d H:i:s', strtotime("now + {$this->expirationDelay} minutes"));
+        return date('Y-m-d H:i:s', strtotime("now + {$this->expirationDelay} seconds"));
     }
 
     /**
@@ -103,13 +107,13 @@ abstract class AbstractCacheObject implements CacheObjectInterface
 
     /**
      * @param string $cacheDirectory
-     * @param bool $createCacheDirectory
+     * @param int $cacheDirectoryMode
      * @return $this
-     * @throws \Exception
+     * @throws FileOperationException
      */
-    public function setCacheDirectory($cacheDirectory, $createCacheDirectory = false)
+    public function setCacheDirectory($cacheDirectory, $cacheDirectoryMode = self::USE_EXISTING_DIR)
     {
-        if ($createCacheDirectory) {
+        if ($cacheDirectoryMode == self::FORCE_CREATE_DIR) {
             if (!is_dir($cacheDirectory) && !mkdir($cacheDirectory)) {
                 throw new FileOperationException(sprintf('unable to create cache directory "%s"', $cacheDirectory));
             }
@@ -158,7 +162,7 @@ abstract class AbstractCacheObject implements CacheObjectInterface
             return $this->refresh();
         }
 
-        return $this->compressed ? zlib_decode($this->content) : $this->content;
+        return $this->compressed ? unserialize(zlib_decode($this->content)) : $this->content;
     }
 
     /**
@@ -169,8 +173,8 @@ abstract class AbstractCacheObject implements CacheObjectInterface
     public function setContent($content = null, $compress = false)
     {
         if ($content) {
-            $this->compressed = is_string($content) && $compress;
-            $this->content = $this->compressed ? zlib_encode($content, ZLIB_ENCODING_GZIP) : $content;
+            $this->compressed = $compress;
+            $this->content = $this->compressed ? zlib_encode(serialize($content), ZLIB_ENCODING_GZIP) : $content;
             $this->modified = true;
         }
 
@@ -282,7 +286,19 @@ abstract class AbstractCacheObject implements CacheObjectInterface
      */
     public function getContentType()
     {
-        return gettype($this->content);
+        return gettype($this->compressed ? unserialize(gzdecode($this->content)) : $this->content);
+    }
+
+    /**
+     * @return null|int
+     */
+    public function getContentSize()
+    {
+        if ('string' == $this->getContentType()) {
+            return strlen($this->getContent());
+        }
+
+        return null;
     }
 
     /**

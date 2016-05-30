@@ -12,10 +12,10 @@ use cache\search\TextSearchProcessor;
 use cache\search\ArraySearchProcessor;
 
 $cacheHTMLObject = new CacheObject('html_content');
-$cacheHTMLObject->setCacheDirectory(dirname(__FILE__).'/../cache', true);
+$cacheHTMLObject->setCacheDirectory(dirname(__FILE__).'/../cache', CacheObject::FORCE_CREATE_DIR);
 
 $cacheArrayObject = new CacheObject('array_content');
-$cacheArrayObject->setCacheDirectory(dirname(__FILE__).'/../cache', true);
+$cacheArrayObject->setCacheDirectory(dirname(__FILE__).'/../cache', CacheObject::FORCE_CREATE_DIR);
 
 $cacheManager = new CacheManager(
     [
