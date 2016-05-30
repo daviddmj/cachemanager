@@ -10,6 +10,7 @@ use cache\manager\CacheManager;
 use cache\file\CacheObject;
 use cache\search\TextSearchProcessor;
 use cache\search\ArraySearchProcessor;
+use cache\search\ObjectSearchProcessor;
 
 $cacheHTMLObject = new CacheObject('html_content');
 $cacheHTMLObject->setCacheDirectory(dirname(__FILE__).'/../cache', CacheObject::FORCE_CREATE_DIR);
@@ -17,10 +18,15 @@ $cacheHTMLObject->setCacheDirectory(dirname(__FILE__).'/../cache', CacheObject::
 $cacheArrayObject = new CacheObject('array_content');
 $cacheArrayObject->setCacheDirectory(dirname(__FILE__).'/../cache', CacheObject::FORCE_CREATE_DIR);
 
+$cacheObjectObject = new CacheObject('object_content');
+$cacheObjectObject->setCacheDirectory(dirname(__FILE__).'/../cache', CacheObject::FORCE_CREATE_DIR);
+
+
 $cacheManager = new CacheManager(
     [
         new TextSearchProcessor(),
-        new ArraySearchProcessor()
+        new ArraySearchProcessor(),
+        new ObjectSearchProcessor()
     ]
 );
 
@@ -28,14 +34,15 @@ $cacheManager
     ->setCacheObjects(
         [
             $cacheHTMLObject,
-            $cacheArrayObject
+            $cacheArrayObject,
+            $cacheObjectObject
         ]
     )
     ->deleteFiles()
 ;
 
 if (!$cacheHTMLObject->hasContent()) {
-    $cacheHTMLObject->setContent(file_get_contents('http://www.google.com/'), true);
+    $cacheHTMLObject->setContent(file_get_contents('http://www.google.com/'), CacheObject::COMPRESSED_DATA);
 }
 
 if (!$cacheArrayObject->hasContent()) {
@@ -51,12 +58,17 @@ if (!$cacheArrayObject->hasContent()) {
     );
 }
 
+if (!$cacheObjectObject->hasContent()) {
+    $cacheObjectObject->setContent(new DateTime(), CacheObject::COMPRESSED_DATA);
+}
+
 $cacheManager->flush();
 
 $cacheFilesWithGoogle = $cacheManager->findCacheObjectsMatching('google');
 $cacheFilesWithDataKey = $cacheManager->findCacheObjectsMatching('nested_key');
+$cacheFilesWithProperty = $cacheManager->findCacheObjectsMatching('timezone');
 
-$cacheObjects = array_merge($cacheFilesWithGoogle, $cacheFilesWithDataKey);
+$cacheObjects = array_merge($cacheFilesWithGoogle, $cacheFilesWithDataKey, $cacheFilesWithProperty);
 
 /** @var CacheObject $cacheObject */
 foreach ($cacheObjects as $cacheObject) {

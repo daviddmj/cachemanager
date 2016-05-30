@@ -18,6 +18,10 @@ abstract class AbstractCacheObject implements CacheObjectInterface
     const USE_EXISTING_DIR = 1;
     const FORCE_CREATE_DIR = 2;
 
+    // Data storage mode
+    const RAW_DATA         = 1;
+    const COMPRESSED_DATA  = 2;
+
     /** @var string */
     private $cacheDirectory = '.';
 
@@ -167,13 +171,13 @@ abstract class AbstractCacheObject implements CacheObjectInterface
 
     /**
      * @param mixed $content
-     * @param bool $compress Compress data if string content
+     * @param int $storageMode Data storage mode
      * @return $this
      */
-    public function setContent($content = null, $compress = false)
+    public function setContent($content = null, $storageMode = self::RAW_DATA)
     {
         if ($content) {
-            $this->compressed = $compress;
+            $this->compressed = $storageMode == self::COMPRESSED_DATA;
             $this->content = $this->compressed ? zlib_encode(serialize($content), ZLIB_ENCODING_GZIP) : $content;
             $this->modified = true;
         }
