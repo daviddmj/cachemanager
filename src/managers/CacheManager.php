@@ -7,7 +7,6 @@ namespace cache\manager;
 
 use cache\interfaces\CacheObjectInterface;
 use cache\interfaces\SearchProcessorInterface;
-use cache\search;
 
 /**
  * Class cacheManager

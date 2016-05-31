@@ -22,7 +22,7 @@ class ArraySearchProcessor implements SearchProcessorInterface
      * @param $content
      * @return bool
      */
-    function isEligible($content)
+    function isSupported($content)
     {
         return 'array' == gettype($content);
     }
@@ -34,7 +34,7 @@ class ArraySearchProcessor implements SearchProcessorInterface
      */
     function search($needle, $content)
     {
-        if (!$this->isEligible($content)) return null;
+        if (!$this->isSupported($content)) return null;
 
         $iterator = new \RecursiveArrayIterator($content);
         $recursive = new \RecursiveIteratorIterator(

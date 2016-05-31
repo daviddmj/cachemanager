@@ -17,7 +17,7 @@ interface SearchProcessorInterface
      * @param $content
      * @return mixed
      */
-    function isEligible($content);
+    function isSupported($content);
 
     /**
      * @param $needle

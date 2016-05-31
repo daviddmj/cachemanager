@@ -22,7 +22,7 @@ class TextSearchProcessor implements SearchProcessorInterface
      * @param $content
      * @return bool
      */
-    function isEligible($content)
+    function isSupported($content)
     {
         return 'string' == gettype($content);
     }
@@ -34,7 +34,7 @@ class TextSearchProcessor implements SearchProcessorInterface
      */
     function search($needle, $content)
     {
-        if (!$this->isEligible($content)) return null;
+        if (!$this->isSupported($content)) return null;
 
         return preg_match('#\b' . preg_quote($needle, '#') . '\b#i', $content);
     }

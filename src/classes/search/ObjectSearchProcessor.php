@@ -12,6 +12,71 @@ use cache\interfaces\SearchProcessorInterface;
 class ObjectSearchProcessor implements SearchProcessorInterface
 {
     /**
+     * @var array $eligibleProperties
+     */
+    private $eligibleProperties = [];
+
+    /**
+     * @var array $eligibleMethods
+     */
+    private $eligibleMethods = [];
+
+    /**
+     * @var array $eligibleStaticProperties
+     */
+    private $eligibleStaticProperties = [];
+
+    /**
+     * @var array $eligibleConstants
+     */
+    private $eligibleConstants = [];
+
+    /**
+     * @return int
+     */
+    private function getTotalCount()
+    {
+        return
+            count($this->eligibleProperties) +
+            count($this->eligibleMethods) +
+            count($this->eligibleStaticProperties) +
+            count($this->eligibleConstants);
+    }
+
+    /**
+     * @param $needle
+     * @param $class
+     */
+    private function findInClass($needle, $class)
+    {
+        $object = new \ReflectionClass($class);
+
+        foreach ($object->getProperties() as $property) {
+            if ($property->getName() == $needle) {
+                array_push($this->eligibleProperties, $property->getName());
+            }
+        }
+
+        foreach ($object->getMethods() as $method) {
+            if ($method->getName() == $needle) {
+                array_push($this->eligibleMethods, $method->getName());
+            }
+        }
+
+        foreach ($object->getStaticProperties() as $staticProperty) {
+            if ($staticProperty == $needle) {
+                array_push($this->eligibleStaticProperties, $staticProperty);
+            }
+        }
+
+        foreach ($object->getConstants() as $constant) {
+            if ($constant == $needle) {
+                array_push($this->eligibleConstants, $constant);
+            }
+        }
+    }
+
+    /**
      * @return string
      */
     function getName()
@@ -23,7 +88,7 @@ class ObjectSearchProcessor implements SearchProcessorInterface
      * @param $content
      * @return bool
      */
-    function isEligible($content)
+    function isSupported($content)
     {
         return 'object' == gettype($content);
     }
@@ -35,48 +100,26 @@ class ObjectSearchProcessor implements SearchProcessorInterface
      */
     function search($needle, $content)
     {
-        if (!$this->isEligible($content)) return null;
+        if (!$this->isSupported($content)) return null;
 
         if (property_exists($content, $needle)) return $content;
 
-        $object = new \ReflectionClass(get_parent_class($content) ? : get_class($content));
+        $currentClass = get_class($content);
+        $this->findInClass($needle, $currentClass);
 
-        $eligibleProperties = [];
-        foreach ($object->getProperties() as $property) {
-            if ($property->getName() == $needle) {
-                array_push($eligibleProperties, $property->getName());
-            }
-        }
-
-        $eligibleMethods = [];
-        foreach ($object->getMethods() as $method) {
-            if ($method->getName() == $needle) {
-                array_push($eligibleMethods, $method->getName());
-            }
-        }
-
-        $eligibleStaticProperties = [];
-        foreach ($object->getStaticProperties() as $staticProperty) {
-            if ($staticProperty == $needle) {
-                array_push($eligibleStaticProperties, $staticProperty);
-            }
-        }
-
-        $eligibleConstants = [];
-        foreach ($object->getConstants() as $constant) {
-            if ($constant == $needle) {
-                array_push($eligibleConstants, $constant);
-            }
+        while (($parentClass = get_parent_class($currentClass)) && ($parentClass !== $currentClass)) {
+            $currentClass = $parentClass;
+            $this->findInClass($needle, $currentClass);
         }
 
         return
-            (count($eligibleProperties)+count($eligibleMethods)+count($eligibleStaticProperties)+count($eligibleConstants)) == 0
+            $this->getTotalCount() == 0
             ? null :
             [
-                'properties'        => $eligibleProperties,
-                'methods'           => $eligibleMethods,
-                'static_properties' => $eligibleStaticProperties,
-                'constants'         => $eligibleConstants
+                'properties'        => $this->eligibleProperties,
+                'methods'           => $this->eligibleMethods,
+                'static_properties' => $this->eligibleStaticProperties,
+                'constants'         => $this->eligibleConstants
             ];
     }
 }

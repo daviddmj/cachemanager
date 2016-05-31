@@ -78,8 +78,8 @@ abstract class AbstractCacheObject implements CacheObjectInterface
             return null;
         }
 
-        $this->content = $cacheObject->compressed ? unserialize(zlib_decode($cacheObject->content)): $cacheObject->content;
-        $this->compressed = false;
+        $this->content = $cacheObject->content;
+        $this->compressed = $cacheObject->compressed;
         $this->modified = false;
 
         return $this->content;
@@ -117,15 +117,15 @@ abstract class AbstractCacheObject implements CacheObjectInterface
      */
     public function setCacheDirectory($cacheDirectory, $cacheDirectoryMode = self::USE_EXISTING_DIR)
     {
-        if ($cacheDirectoryMode == self::FORCE_CREATE_DIR) {
-            if (!is_dir($cacheDirectory) && !mkdir($cacheDirectory)) {
-                throw new FileOperationException(sprintf('unable to create cache directory "%s"', $cacheDirectory));
-            }
+        if ($cacheDirectoryMode == self::FORCE_CREATE_DIR && (!is_dir($cacheDirectory) && !mkdir($cacheDirectory))) {
+            throw new FileOperationException(sprintf('unable to create cache directory "%s"', $cacheDirectory));
         }
 
-        if (is_dir($cacheDirectory)) {
-            $this->cacheDirectory = $cacheDirectory;
+        if ($cacheDirectoryMode == self::USE_EXISTING_DIR && !is_dir($cacheDirectory)) {
+            throw new FileOperationException(sprintf('directory "%s" not found', $cacheDirectory));
         }
+
+        $this->cacheDirectory = $cacheDirectory;
 
         return $this;
     }
@@ -162,9 +162,7 @@ abstract class AbstractCacheObject implements CacheObjectInterface
      */
     public function getContent()
     {
-        if (!$this->content) {
-            return $this->refresh();
-        }
+        if (!$this->content) $this->refresh();
 
         return $this->compressed ? unserialize(zlib_decode($this->content)) : $this->content;
     }
@@ -290,7 +288,7 @@ abstract class AbstractCacheObject implements CacheObjectInterface
      */
     public function getContentType()
     {
-        return gettype($this->compressed ? unserialize(gzdecode($this->content)) : $this->content);
+        return gettype($this->getContent());
     }
 
     /**
