@@ -34,8 +34,13 @@ class TextSearchProcessor implements SearchProcessorInterface
      */
     function search($needle, $content)
     {
-        if (!$this->isSupported($content)) return null;
+        if ($this->isSupported($content) && preg_match_all('#\b' . preg_quote($needle, '#') . '\b#i', $content, $matches)) {
+            return [
+                'needle' => $needle,
+                'count' => count($matches[0])
+            ];
+        }
 
-        return preg_match('#\b' . preg_quote($needle, '#') . '\b#i', $content);
+        return null;
     }
 }

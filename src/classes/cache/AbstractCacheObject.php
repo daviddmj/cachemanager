@@ -28,8 +28,8 @@ abstract class AbstractCacheObject implements CacheObjectInterface
     /** @var null|string $cacheFile */
     private $cacheFile = 'content.cache';
 
-    /** @var int $expirationDelay in minutes, 12 hours by default */
-    private $expirationDelay = 720;
+    /** @var int $expirationDelay 12 hours by default */
+    private $expirationDelay = 43200;
 
     /** @var string $name */
     private $name;

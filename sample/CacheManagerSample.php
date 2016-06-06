@@ -11,6 +11,7 @@ use cache\file\CacheObject;
 use cache\search\TextSearchProcessor;
 use cache\search\ArraySearchProcessor;
 use cache\search\ObjectSearchProcessor;
+use cache\search\result\SearchResult;
 
 /**
  * Create CacheManager instance and related search processors and cache objects to work with.
@@ -78,11 +79,11 @@ $cacheObjects = array_merge(
     $cacheManager->findCacheObjectsMatching('getExpirationDate')
 );
 
-/** @var CacheObject $cacheObject */
-foreach ($cacheObjects as $cacheObject) {
+/** @var SearchResult $searchResult */
+foreach ($cacheObjects as $searchResult) {
     var_dump(
         [
-            $cacheObject->getName() => $cacheObject->getContent()
+            $searchResult->getCacheObject()->getName() => $searchResult->getResult()
         ]
     );
 }

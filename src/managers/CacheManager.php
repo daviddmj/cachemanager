@@ -7,6 +7,7 @@ namespace cache\manager;
 
 use cache\interfaces\CacheObjectInterface;
 use cache\interfaces\SearchProcessorInterface;
+use cache\search\result\ResultObject;
 
 /**
  * Class cacheManager
@@ -198,7 +199,7 @@ final class CacheManager
 
     /**
      * @param string $needle
-     * @return array
+     * @return ResultObject[]
      */
     public function findCacheObjectsMatching($needle)
     {
@@ -210,8 +211,8 @@ final class CacheManager
 
             /** @var SearchProcessorInterface $searchProcessor */
             foreach ($this->searchProcessors as $searchProcessor) {
-                if ($searchProcessor->search($needle, $cacheContent)) {
-                    $eligibleCacheObjects[$cacheObject->getName()] = $cacheObject;
+                if ($result = $searchProcessor->search($needle, $cacheContent)) {
+                    $eligibleCacheObjects[$cacheObject->getName()] = new ResultObject($cacheObject, $result);
                 }
             }
         }
