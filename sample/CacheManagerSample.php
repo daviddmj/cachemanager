@@ -8,10 +8,10 @@ require_once(dirname(__FILE__) . '/../autoload.php');
 
 use cache\manager\CacheManager;
 use cache\file\CacheObject;
-use cache\search\TextSearchProcessor;
-use cache\search\ArraySearchProcessor;
-use cache\search\ObjectSearchProcessor;
-use cache\search\result\SearchResult;
+use cache\search\processors\TextSearchProcessor;
+use cache\search\processors\ArraySearchProcessor;
+use cache\search\processors\ObjectSearchProcessor;
+use cache\search\results\SearchResultObject;
 
 /**
  * Create CacheManager instance and related search processors and cache objects to work with.
@@ -79,11 +79,11 @@ $cacheObjects = array_merge(
     $cacheManager->findCacheObjectsMatching('getExpirationDate')
 );
 
-/** @var SearchResult $searchResult */
+/** @var SearchResultObject $searchResult */
 foreach ($cacheObjects as $searchResult) {
     var_dump(
         [
-            $searchResult->getCacheObject()->getName() => $searchResult->getResult()
+            $searchResult->getCacheObject()->getName() => $searchResult->getCacheObject()->getCacheDirectory()
         ]
     );
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace cache\search\result;
+namespace cache\search\results;
 
 use cache\interfaces\CacheObjectInterface;
 use cache\interfaces\ResultObjectInterface;
@@ -8,7 +8,7 @@ use cache\interfaces\ResultObjectInterface;
 /**
  * Class ResultObject
  */
-class ResultObject implements ResultObjectInterface
+class SearchResultObject implements ResultObjectInterface
 {
     /**
      * @var CacheObjectInterface

@@ -1,6 +1,6 @@
 <?php
 
-namespace cache\search;
+namespace cache\search\processors;
 
 use cache\interfaces\SearchProcessorInterface;
 
